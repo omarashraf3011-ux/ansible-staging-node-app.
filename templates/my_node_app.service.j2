@@ -1,0 +1,15 @@
+# templates/my_node_app.service.j2
+
+[Unit]
+Description=My Node.js App
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /home/ubuntu/app/app.js
+Restart=always
+User=ubuntu
+Environment=PORT=3000
+WorkingDirectory=/home/ubuntu/app
+
+[Install]
+WantedBy=multi-user.target

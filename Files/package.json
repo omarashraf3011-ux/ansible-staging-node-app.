@@ -1,0 +1,11 @@
+{
+  "name": "ansible-node-app",
+  "version": "1.0.0",
+  "description": "Simple Node.js app deployed with Ansible",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "Your Name",
+  "license": "ISC"
+}

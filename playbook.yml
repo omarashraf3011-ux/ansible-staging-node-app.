@@ -1,0 +1,63 @@
+---
+- name: Deploy Node.js app on Ubuntu VM
+  hosts: staging
+  become: true
+
+  vars:
+    app_dir: /home/ubuntu/app
+    app_service_name: my_node_app
+    node_port: 3000
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Node.js and npm
+      ansible.builtin.apt:
+        name:
+          - nodejs
+          - npm
+        state: present
+
+    - name: Create application directory
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Copy application files (app.js and package.json)
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ app_dir }}/"
+      loop:
+        - files/app.js
+        - files/package.json
+
+    - name: Install npm dependencies
+      ansible.builtin.npm:
+        path: "{{ app_dir }}"
+
+    - name: Deploy systemd service file
+      ansible.builtin.template:
+        src: templates/my_node_app.service.j2
+        dest: /etc/systemd/system/{{ app_service_name }}.service
+        mode: '0644'
+
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: Enable and start Node.js app service
+      ansible.builtin.systemd:
+        name: "{{ app_service_name }}"
+        state: started
+        enabled: yes
+
+    - name: Ensure application port is allowed in UFW
+      ansible.builtin.ufw:
+        rule: allow
+        port: "{{ node_port }}"
+        proto: tcp
